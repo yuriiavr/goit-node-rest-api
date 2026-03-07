@@ -1,45 +1,47 @@
-const fs = require("fs").promises;
-const path = require("path");
-
-const contactsPath = path.join(__dirname, "db", "contacts.json");
+import { Contact } from "../db/models.js";
 
 async function listContacts() {
-  const data = await fs.readFile(contactsPath, "utf-8");
-  return JSON.parse(data);
+  return await Contact.findAll();
 }
 
 async function getContactById(contactId) {
-  const contacts = await listContacts();
-  const result = contacts.find((item) => item.id === contactId);
-  return result || null;
+  return await Contact.findByPk(contactId);
 }
 
 async function removeContact(contactId) {
-  const contacts = await listContacts();
-  const index = contacts.findIndex((item) => item.id === contactId);
-  if (index === -1) return null;
-
-  const [removedContact] = contacts.splice(index, 1);
-  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-  return removedContact;
+  const deletedCount = await Contact.destroy({
+    where: { id: contactId },
+  });
+  return deletedCount > 0 ? true : null;
 }
 
-async function addContact(name, email, phone) {
-  const contacts = await listContacts();
-  const newContact = {
-    id: Date.now().toString(),
-    name,
-    email,
-    phone,
-  };
-  contacts.push(newContact);
-  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-  return newContact;
+async function addContact(data) {
+  return await Contact.create(data);
 }
 
-module.exports = {
+async function updateContact(contactId, data) {
+  const [updatedCount] = await Contact.update(data, {
+    where: { id: contactId },
+  });
+
+  if (updatedCount === 0) return null;
+  return await Contact.findByPk(contactId);
+}
+
+async function updateStatusContact(contactId, data) {
+  const [updatedCount] = await Contact.update(data, {
+    where: { id: contactId },
+  });
+
+  if (updatedCount === 0) return null;
+  return await Contact.findByPk(contactId);
+}
+
+export default {
   listContacts,
   getContactById,
   removeContact,
   addContact,
+  updateContact,
+  updateStatusContact,
 };
