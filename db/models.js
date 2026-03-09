@@ -13,6 +13,27 @@ export const sequelize = new Sequelize(process.env.DB_URI, {
   logging: false,
 });
 
+export const User = sequelize.define('user', {
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  subscription: {
+    type: DataTypes.ENUM,
+    values: ["starter", "pro", "business"],
+    defaultValue: "starter"
+  },
+  token: {
+    type: DataTypes.STRING,
+    defaultValue: null,
+  },
+});
+
 export const Contact = sequelize.define('contact', {
   name: {
     type: DataTypes.STRING,
@@ -30,7 +51,14 @@ export const Contact = sequelize.define('contact', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  owner: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  }
 });
+
+User.hasMany(Contact, { foreignKey: 'owner' });
+Contact.belongsTo(User, { foreignKey: 'owner' });
 
 export const connectDB = async () => {
   try {
