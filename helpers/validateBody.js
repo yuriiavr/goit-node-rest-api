@@ -1,15 +1,17 @@
 import HttpError from "./HttpError.js";
 
 const validateBody = (schema) => {
-  const func = (req, _, next) => {
+  return (req, res, next) => {
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return next(HttpError(400, "Missing fields"));
+    }
+
     const { error } = schema.validate(req.body);
     if (error) {
-      next(HttpError(400, error.message));
+      return next(HttpError(400, error.message));
     }
     next();
   };
-
-  return func;
 };
 
 export default validateBody;

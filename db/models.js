@@ -13,6 +13,17 @@ export const sequelize = new Sequelize(process.env.DB_URI, {
   logging: false,
 });
 
+export const connectDB = async () => {
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync({ alter: true });
+    console.log("Database connection successful");
+  } catch (error) {
+    console.error("Database connection error:", error.message);
+    process.exit(1);
+  }
+};
+
 export const User = sequelize.define('user', {
   password: {
     type: DataTypes.STRING,
@@ -32,41 +43,15 @@ export const User = sequelize.define('user', {
     type: DataTypes.STRING,
     defaultValue: null,
   },
+  avatarURL: {
+    type: DataTypes.STRING,
+  },
 });
 
 export const Contact = sequelize.define('contact', {
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  phone: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  favorite: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-  owner: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  }
+  name: { type: DataTypes.STRING, allowNull: false },
+  email: { type: DataTypes.STRING, allowNull: false },
+  phone: { type: DataTypes.STRING, allowNull: false },
+  favorite: { type: DataTypes.BOOLEAN, defaultValue: false },
+  owner: { type: DataTypes.INTEGER, allowNull: false }
 });
-
-User.hasMany(Contact, { foreignKey: 'owner' });
-Contact.belongsTo(User, { foreignKey: 'owner' });
-
-export const connectDB = async () => {
-  try {
-    await sequelize.authenticate();
-    await sequelize.sync();
-    console.log("Database connection successful");
-  } catch (error) {
-    console.error("Database connection error:", error.message);
-    process.exit(1);
-  }
-};
