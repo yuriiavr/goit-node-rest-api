@@ -4,10 +4,12 @@ import {
   login,
   logout,
   getCurrent,
-  updateAvatar
+  updateAvatar,
+  verifyEmail,
+  resendVerifyEmail,
 } from "../controllers/authControllers.js";
 import validateBody from "../helpers/validateBody.js";
-import { registerSchema, loginSchema } from "../schemas/authSchemas.js";
+import { registerSchema, loginSchema, emailSchema } from "../schemas/authSchemas.js";
 import upload from "../middlewares/upload.js";
 import authenticate from "../middlewares/authenticate.js";
 
@@ -24,5 +26,9 @@ authRouter.patch(
   upload.single("avatarURL"),
   updateAvatar
 );
+
+authRouter.get("/verify/:verificationToken", verifyEmail);
+
+authRouter.post("/verify", validateBody(emailSchema), resendVerifyEmail);
 
 export default authRouter;
